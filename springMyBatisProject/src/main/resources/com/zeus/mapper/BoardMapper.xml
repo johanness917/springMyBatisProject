@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zeus.mapper.BoardMapper">
-	<insert id="create" >
+	<insert id="create">
 		INSERT INTO mybatisBoard(no, title, content,
 		writer)
 		VALUES( mybatisBoard_seq.NEXTVAL, #{title}, #{content},
 		#{writer})
 	</insert>
-	
+
 	<select id="read" resultType="Board">
-		SELECT no, title, content,
-		writer, regDate FROM mybatisBoard
+		SELECT no, title, content, writer,
+		regDate FROM mybatisBoard
 		WHERE no = #{no}
 	</select>
-	
+
 	<update id="update">
 		UPDATE mybatisBoard
 		SET title = #{title}, content =

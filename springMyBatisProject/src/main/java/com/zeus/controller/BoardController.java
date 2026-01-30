@@ -30,14 +30,16 @@ public class BoardController {
 	public String boardInsert(Board board, Model model) {
 		log.info("insert board=" + board.toString());
 		try {
-			boardService.create(board);
+			int count = boardService.create(board);
+			if (count > 0) {
+				model.addAttribute("message", "%s 님의 게시판이 등록 되었습니다.".formatted(board.getWriter()));
+				return "board/success";
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			model.addAttribute("message", "%s 님 게시판 등록 실패.".formatted(board.getWriter()));
-			return "board/failed";
 		}
-		model.addAttribute("message", "%s 님의 게시판이 등록 되었습니다.".formatted(board.getWriter()));
-		return "board/success";
+		model.addAttribute("message", "%s 님 게시판 등록 실패.".formatted(board.getWriter()));
+		return "board/failed";
 	}
 
 	@GetMapping("/boardList") // 오타 수정
@@ -67,18 +69,22 @@ public class BoardController {
 		return "board/detail"; // 실제 파일명과 매칭
 	}
 
-	@GetMapping("/delete") // 오타 수정
+	@GetMapping("/delete")
 	public String boardDelete(Board board, Model model) {
-		log.info("boardDelete board=" + board.toString());
-		try {
-			boardService.delete(board);
-		} catch (Exception e) {
-			e.printStackTrace();
-			model.addAttribute("message", "%d 님의 정보가 삭제 실패.".formatted(board.getNo()));
-			return "board/failed"; // 실제 파일명과 매칭
-		}
-		model.addAttribute("message", "%d 님의 정보가 삭제되었습니다.".formatted(board.getNo()));
-		return "board/success";
+	    log.info("boardDelete board=" + board.toString());
+	    try {
+	        int count = boardService.delete(board);
+	        
+	        // count가 1 이상이면 데이터가 정상적으로 삭제된 것입니다.
+	        if (count > 0) {
+	            model.addAttribute("message", "%d번 게시글이 삭제되었습니다.".formatted(board.getNo()));
+	            return "board/success";
+	        } 
+	    } catch (Exception e) {
+	        log.error("삭제 중 오류 발생", e);
+	    }
+	    model.addAttribute("message", "삭제 처리 중 시스템 오류가 발생했습니다.");
+	    return "board/failed";
 	}
 
 	@GetMapping("/updateForm") // 오타 수정
@@ -97,18 +103,22 @@ public class BoardController {
 		return "board/updateForm"; // 실제 파일명과 매칭
 	}
 
-	@PostMapping("/update") // 오타 수정
+	@PostMapping("/update")
 	public String boardUpdate(Board b, Model model) {
-		log.info("boardUpdate board=" + b.toString());
-		try {
-			boardService.update(b);
-			model.addAttribute("board", b);
-			model.addAttribute("message", "%s 게시판 수정 실패.".formatted(b.getWriter()));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		model.addAttribute("message", "%s 게시판 수정 성공 했습니다.".formatted(b.getWriter()));
-		return "board/success";
+	    log.info("boardUpdate board=" + b.toString());
+	    try {
+	        int count = boardService.update(b);
+	        
+	        // count가 1이면 성공, 0이면 수정된 행이 없으므로 실패입니다.
+	        if (count > 0) {
+	            model.addAttribute("message", "%s님의 게시글이 성공적으로 수정되었습니다.".formatted(b.getWriter()));
+	            return "board/success";
+	        }
+	    } catch (Exception e) {
+	        log.error("수정 중 오류 발생: ", e);
+	    }
+	    model.addAttribute("message", "시스템 오류가 발생했습니다.");
+	    return "board/failed";
 	}
 
 	@GetMapping("/search") // 오타 수정
